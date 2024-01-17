@@ -16,11 +16,12 @@ class Act {
 }
 
 class Scene {
-  constructor(name, title, stageDirection, speeches) {
+  constructor(name, title, stageDirection, speeches, act) {
     this.name = name;
     this.title = title;
     this.stageDirection = stageDirection;
     this.speeches = speeches;
+    this.act = act;
   }
 }
 
