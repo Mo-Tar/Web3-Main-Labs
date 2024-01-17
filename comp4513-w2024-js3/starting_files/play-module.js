@@ -1,4 +1,3 @@
-/* In this module, create three classes: Play, Act, and Scene. */
 
 class Play {
   constructor(title, short, acts, personas) {
@@ -24,3 +23,6 @@ class Scene {
     this.speeches = speeches;
   }
 }
+
+
+export {Play, Act, Scene };
