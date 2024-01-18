@@ -26,7 +26,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     playMaker();
   }
-
+  //<--------------------------------------- EVENT LISTNERS-------------------------------------------------->
+    listOfActs.addEventListener("change", (e) => {
+      populateSceneSelection(e.target.value);
+    });
+  
+    listOfScenes.addEventListener("change", (e) =>{
+  
+    });
   /*
     makes an event listener for the the
    */
@@ -35,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
     myFetcher(e.target.value);
   });
 
+  //<------------------------------------------Everything starts and happens here-------------------------------------------->
   /*
     functon : no Parameter
     populates the following variables:
@@ -124,7 +132,5 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  listOfActs.addEventListener("change", (e) => {
-    populateSceneSelection(e.target.value);
-  });
+
 });
