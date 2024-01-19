@@ -1,7 +1,6 @@
 import { Play, Act, Scene } from "./play-module.js";
 
 document.addEventListener("DOMContentLoaded", function () {
-
   const url =
     "https://www.randyconnolly.com//funwebdev/3rd/api/shakespeare/play.php";
 
@@ -13,6 +12,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let listOfScenes = document.querySelector("#sceneList");
   let listOfPlayers = document.querySelector("#playerList");
   let allPlayers = listOfPlayers.firstElementChild;
+  let actName;
+  let sceneName;
 
   /*
     Fetches the play and calls the func "playMaker"
@@ -21,19 +22,26 @@ document.addEventListener("DOMContentLoaded", function () {
     const response = await fetch(url + `?name=${playname}`);
     data = await response.json();
 
-    if (document.querySelector('#playList').children.length > 2) {
-      document.querySelector('#playList').firstElementChild.remove();
+    if (document.querySelector("#playList").children.length > 2) {
+      document.querySelector("#playList").firstElementChild.remove();
     }
     playMaker();
   }
   //<--------------------------------------- EVENT LISTNERS-------------------------------------------------->
-    listOfActs.addEventListener("change", (e) => {
-      populateSceneSelection(e.target.value);
-    });
-  
-    listOfScenes.addEventListener("change", (e) =>{
-  
-    });
+  //act event handler
+  listOfActs.addEventListener("change", (e) => {
+    actName = e.target.value;
+    populateSceneSelection(actName);
+    setActName(actName);
+    setScene(arrayScenes[0].name, actName);
+  });
+
+  //scene event handler
+  listOfScenes.addEventListener("change", (e) => {
+    sceneName = e.target.value;
+    setScene(sceneName, actName);
+  });
+
   /*
     makes an event listener for the the
    */
@@ -74,10 +82,15 @@ document.addEventListener("DOMContentLoaded", function () {
         arrayScenes.push(scene);
       }
     }
-    document.querySelector('#playHere h2').innerHTML = play.title;
+    console.log(play);
+    document.querySelector("#playHere h2").textContent = play.title;
     populatePlayers();
     populateActSelection();
-    populateSceneSelection(arrayActs[0].name);
+    actName = arrayActs[0].name;
+    sceneName = arrayScenes[0].name;
+    populateSceneSelection(actName);
+    setActName(actName);
+    setScene(sceneName, actName);
   }
 
   //populates the player field
@@ -117,13 +130,13 @@ document.addEventListener("DOMContentLoaded", function () {
   /*
     creates child nodes for scenes selection
   */
-  function populateSceneSelection(actName) {
+  function populateSceneSelection(aName) {
     //reset
     listOfScenes.replaceChildren();
 
     //populate scenes selection
     arrayScenes.forEach((scene) => {
-      if (scene.act == actName) {
+      if (scene.act == aName) {
         let option = document.createElement("option");
         option.value = scene.name;
         option.text = scene.name;
@@ -132,5 +145,41 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  //changes the name of the act
+  function setActName(aName) {
+    let actHTML = document.querySelector("#actHere h3");
+    actHTML.textContent = aName;
+  }
 
+  function setScene(sName, aName) {
+    let scenehere = document.querySelector("#sceneHere");
+    scenehere.replaceChildren();
+    scenehere.appendChild(document.createElement("h4").textContent = sName);
+
+    //check for correct scene
+    for (const scene of arrayScenes) {
+      if (scene.name == sName && scene.act == aName) {
+        document.querySelector(".title").textContent = scene.title;
+        document.querySelector(".direction").textContent = scene.stageDirection;
+        for (const speech of scene.speeches) {
+          let div = document.createElement("div");
+          div.className ="speech";
+          let span = document.createElement("span");
+          span.textContent = speech.speaker;
+          div.appendChild(span);
+          for (const line of speech.lines) {
+            let p = document.createElement('p');
+            p.textContent = line;
+            div.appendChild(p);
+          }
+          if (speech.stagedir){
+            let stgdir = document.createElement('em');
+            stgdir.textContent = speech.stagedir
+            div.appendChild(stgdir)
+          }
+          scenehere.appendChild(div);
+        }
+      }
+    }
+  }
 });
