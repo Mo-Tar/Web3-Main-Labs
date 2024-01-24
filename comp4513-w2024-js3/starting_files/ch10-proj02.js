@@ -31,9 +31,10 @@ document.addEventListener("DOMContentLoaded", function () {
   //act event handler
   listOfActs.addEventListener("change", (e) => {
     actName = e.target.value;
+    sceneName = arrayScenes[0].name;
     populateSceneSelection(actName);
     setActName(actName);
-    setScene(arrayScenes[0].name, actName);
+    setScene(sceneName, actName);
   });
 
   //scene event handler
@@ -50,6 +51,24 @@ document.addEventListener("DOMContentLoaded", function () {
     myFetcher(e.target.value);
   });
 
+  function intializeFilter() {
+    /*
+    event listner for filter
+  */
+    let hLight = document.querySelector("#btnHighlight");
+    hLight.addEventListener("click", () => {
+      const player = document.querySelector("#playerList").value;
+      if (player != 0) {
+        setSceneForPlayer(sceneName, actName, player);
+      } else {
+        setScene(sceneName, actName);
+      }
+      let input = document.querySelector("#txtHighlight").value;
+      if (input.length > 0) {
+        matchText(input);
+      }
+    });
+  }
   //<------------------------------------------Everything starts and happens here-------------------------------------------->
   /*
     functon : no Parameter
@@ -91,6 +110,7 @@ document.addEventListener("DOMContentLoaded", function () {
     populateSceneSelection(actName);
     setActName(actName);
     setScene(sceneName, actName);
+    intializeFilter();
   }
 
   //populates the player field
@@ -105,7 +125,7 @@ document.addEventListener("DOMContentLoaded", function () {
     for (const persona of play.personas) {
       index = index + 1;
       let option = document.createElement("option");
-      option.value = index;
+      option.value = persona.player;
       option.text = persona.player;
       listOfPlayers.appendChild(option);
     }
@@ -144,7 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
-
+  // -------------------------------UGLY FUNCTIONS--------------------------------
   //changes the name of the act
   function setActName(aName) {
     let actHTML = document.querySelector("#actHere h3");
@@ -154,32 +174,126 @@ document.addEventListener("DOMContentLoaded", function () {
   function setScene(sName, aName) {
     let scenehere = document.querySelector("#sceneHere");
     scenehere.replaceChildren();
-    scenehere.appendChild(document.createElement("h4").textContent = sName);
+    let sceneName = document.createElement("h4");
+    sceneName.textContent = sName;
+    scenehere.appendChild(sceneName);
 
     //check for correct scene
     for (const scene of arrayScenes) {
       if (scene.name == sName && scene.act == aName) {
-        document.querySelector(".title").textContent = scene.title;
-        document.querySelector(".direction").textContent = scene.stageDirection;
+        let title = document.createElement("p");
+        title.className = "title";
+        title.textContent = scene.title;
+        scenehere.appendChild(title);
+        //document.querySelector(".title").textContent = scene.title;
+        let sDirection = document.createElement("p");
+        sDirection.className = "direction";
+        sDirection.textContent = scene.stageDirection;
+        scenehere.appendChild(sDirection);
         for (const speech of scene.speeches) {
           let div = document.createElement("div");
-          div.className ="speech";
+          div.className = "speech";
           let span = document.createElement("span");
           span.textContent = speech.speaker;
           div.appendChild(span);
           for (const line of speech.lines) {
-            let p = document.createElement('p');
+            let p = document.createElement("p");
             p.textContent = line;
             div.appendChild(p);
           }
-          if (speech.stagedir){
-            let stgdir = document.createElement('em');
-            stgdir.textContent = speech.stagedir
-            div.appendChild(stgdir)
+          if (speech.stagedir) {
+            let stgdir = document.createElement("em");
+            stgdir.textContent = speech.stagedir;
+            div.appendChild(stgdir);
           }
           scenehere.appendChild(div);
         }
       }
     }
+  }
+  //----------------------------------------------------------------
+
+  //filters the speeches and I know this is bad code...
+  function setSceneForPlayer(sName, aName, pName) {
+    let scenehere = document.querySelector("#sceneHere");
+    scenehere.replaceChildren();
+    let sceneName = document.createElement("h4");
+    sceneName.textContent = sName;
+    scenehere.appendChild(sceneName);
+
+    //for each scene
+    for (const scene of arrayScenes) {
+      //check for correct scene name and act name
+      if (scene.name == sName && scene.act == aName) {
+        //creating the title
+        let title = document.createElement("p");
+        title.className = "title";
+        title.textContent = scene.title;
+        scenehere.appendChild(title);
+        //setting stage direction
+        let sDirection = document.createElement("p");
+        sDirection.className = "direction";
+        sDirection.textContent = scene.stageDirection;
+        scenehere.appendChild(sDirection);
+        //for each speech
+        for (const speech of scene.speeches) {
+          //checking for speaker name
+          if (speech.speaker == pName) {
+            //creates dive and assign proper speaker to it
+            let div = document.createElement("div");
+            div.className = "speech";
+            let span = document.createElement("span");
+            span.textContent = speech.speaker;
+            div.appendChild(span);
+            //actors may have multiple thus the for-loop
+            for (const line of speech.lines) {
+              let p = document.createElement("p");
+              p.textContent = line;
+              div.appendChild(p);
+            }
+            //for stage directions Like exit ghost
+            if (speech.stagedir) {
+              let stgdir = document.createElement("em");
+              stgdir.textContent = speech.stagedir;
+              div.appendChild(stgdir);
+            }
+            scenehere.appendChild(div);
+          }
+        }
+        if (document.querySelector(".speech") == null) {
+          alert(`There are no lines for ${pName} in ${aName}, ${sName}.`);
+
+          setScene(sName, aName);
+        }
+      }
+    }
+  }
+  //----------------------------------------------------------------
+
+  //matches the given input to the divs
+
+  function matchText(input) {
+    const text = input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    let lines = document.querySelectorAll(".speech p");
+    lines.forEach((p) => {
+      let line = p.textContent;
+      let matches = [...line.toLowerCase().matchAll(text)];
+      if (matches) {
+        for (const match of matches) {
+          let ptag = document.createElement("p")
+          let btag = document.createElement("b");
+          let target = line.substring(match['index'], ((match['index'] + input.length)))
+          btag.textContent = target;
+          let before = line.substring(0, match['index']);
+          let after = line.substring((match['index'] + input.length), line.length);
+          ptag.textContent = before;
+          ptag.textContent += btag;
+          ptag.textContent += after;
+          console.log(ptag.innerHTML);
+          p = ptag;
+        }
+      }
+    });
   }
 });
