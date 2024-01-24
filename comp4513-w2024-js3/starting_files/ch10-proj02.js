@@ -285,13 +285,12 @@ document.addEventListener("DOMContentLoaded", function () {
           let btag = document.createElement("b");
           let target = line.substring(match['index'], ((match['index'] + input.length)))
           btag.textContent = target;
-          let before = line.substring(0, match['index']);
-          let after = line.substring((match['index'] + input.length), line.length);
-          ptag.textContent = before;
-          ptag.textContent += btag;
-          ptag.textContent += after;
-          console.log(ptag.innerHTML);
-          p = ptag;
+          let before = document.createTextNode(line.substring(0, match['index']));
+          let after = document.createTextNode(line.substring((match['index'] + input.length), line.length));
+          ptag.appendChild(before);
+          ptag.appendChild(btag);
+          ptag.appendChild(after);
+          p.replaceWith(ptag);
         }
       }
     });
